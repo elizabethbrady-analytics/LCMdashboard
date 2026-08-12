@@ -1,0 +1,50 @@
+/* LCM Analytics — design tokens
+   Direction: "financial editorial" — warm paper, evergreen ink, lime accent.
+   Categorical palette validated (dataviz six-checks, light surface):
+   all PASS; CVD worst-pair 7.2 (6–8 band) — legal with the secondary
+   encoding we ship everywhere (direct labels + 2px surface gaps). */
+
+:root {
+  /* Surfaces */
+  --paper: #f7f5f0;
+  --card: #fffefb;
+  --card-raised: #ffffff;
+  --sidebar: #122b23;
+  --sidebar-ink: #e9ede4;
+  --sidebar-muted: #93a599;
+
+  /* Ink */
+  --ink: #16302a;
+  --ink-secondary: #4c5f56;
+  --ink-muted: #7d8b81;
+  --hairline: #e4e0d4;
+  --hairline-strong: #cfc9b8;
+
+  /* Brand */
+  --brand: #0e5b4a;
+  --accent: #86a934; /* the program lime — accents & highlights only, not a data series */
+  --accent-deep: #647a1f;
+
+  /* Categorical — fixed segment order, never cycled */
+  --seg-newly-enrolled: #0e8a5f;
+  --seg-stars: #b57614;
+  --seg-consistent: #2f6bb0;
+  --seg-engagement: #c74e33;
+  --seg-needs-attention: #8a5fb5;
+  --seg-dormant: #647a1f;
+
+  /* Status (reserved — never used as series colors) */
+  --status-good: #1e7a3c;
+  --status-warning: #a86a00;
+  --status-serious: #b3401e;
+
+  /* Type */
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-body: 'Archivo', 'Helvetica Neue', sans-serif;
+
+  /* Rhythm */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 1px 2px rgba(22, 48, 42, 0.05), 0 4px 16px rgba(22, 48, 42, 0.04);
+  --shadow-panel: 0 8px 40px rgba(18, 43, 35, 0.22);
+}
