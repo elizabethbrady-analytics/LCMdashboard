@@ -236,7 +236,7 @@ const execView = [
     eq: { text: 'count of providers in journey (of the qualified pool)', parts: [['In journey', 'inJourney', 'num'], ['Qualified', 'qualified', 'num']], calc: (s) => s.inJourney, fmtKind: 'num' },
   },
   {
-    id: `${EXEC}.activated`, dashboard: EXEC, module: 'Executive View', name: 'Activated providers', viz: 'scorecard+trend+table',
+    id: `${EXEC}.activated`, dashboard: EXEC, module: 'Executive View', name: 'Total activated providers', viz: 'scorecard+trend+table',
     plain: 'Providers who have submitted at least one application and/or run at least one transaction.',
     definition: 'Activated = ≥1 application AND/OR ≥1 transaction (provider level). Transaction-only activation covers app-blocked providers under local restrictions/laws.',
     measure: 'Total; % of total; by industry; by activation channel',
