@@ -54,7 +54,7 @@ export default function FilterBar() {
           onChange={(e) => f.setProduct(e.target.value)}
         >
           <option value="All">All products</option>
-          {f.PRODUCTS.map((p) => (
+          {f.PRODUCTS.filter((p) => p !== 'ISV').map((p) => (
             <option key={p} value={p}>{p === 'PL' ? 'PL (Pay Later)' : p}</option>
           ))}
         </select>
