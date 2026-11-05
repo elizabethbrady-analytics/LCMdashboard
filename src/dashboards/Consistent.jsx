@@ -20,14 +20,14 @@ export default function Consistent({ scope, priorScope, filter }) {
   const offerSeries = useMemo(() => {
     const months = filter.months ?? MONTHS
     return months.map((month) => {
-      const a = agg({ segments: ['Consistent'], industries: filter.industries, products: filter.products, months: [month] })
+      const a = agg({ segments: ['Consistent'], industries: filter.industries, products: filter.products, channels: filter.channels, months: [month] })
       return { month, value: a.active ? Math.round((a.apps / a.active) * 100) / 100 : 0 }
     })
   }, [filter])
 
   const flows = useMemo(
     () =>
-      migrationMatrix({ industries: filter.industries, products: filter.products, months: filter.months })
+      migrationMatrix({ industries: filter.industries, products: filter.products, channels: filter.channels, months: filter.months })
         .filter((f) => f.from === 'Consistent'),
     [filter],
   )

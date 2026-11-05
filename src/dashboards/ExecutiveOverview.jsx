@@ -64,7 +64,7 @@ export default function ExecutiveOverview({ scope, priorScope, filter }) {
   )
   const buckets = useMemo(() => activationBuckets(filter, 'exec-act'), [filter])
   const flows = useMemo(
-    () => migrationMatrix({ industries: filter.industries, products: filter.products, months: filter.months }),
+    () => migrationMatrix({ industries: filter.industries, products: filter.products, channels: filter.channels, months: filter.months }),
     [filter],
   )
 

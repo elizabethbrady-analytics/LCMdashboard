@@ -54,8 +54,21 @@ export default function FilterBar() {
           onChange={(e) => f.setProduct(e.target.value)}
         >
           <option value="All">All products</option>
-          {f.PRODUCTS.filter((p) => p !== 'ISV').map((p) => (
+          {f.PRODUCTS.map((p) => (
             <option key={p} value={p}>{p === 'PL' ? 'PL (Pay Later)' : p}</option>
+          ))}
+        </select>
+      </div>
+      <div className="filter-group">
+        <span className="filter-label">Channel</span>
+        <select
+          className="filter-select"
+          value={f.channel}
+          onChange={(e) => f.setChannel(e.target.value)}
+        >
+          <option value="All">All channels</option>
+          {f.CHANNELS.map((c) => (
+            <option key={c} value={c}>{c}</option>
           ))}
         </select>
       </div>

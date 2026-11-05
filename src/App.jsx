@@ -71,13 +71,13 @@ function Page() {
   const dashboard = DASHBOARDS.find((d) => d.path === pathname) ?? DASHBOARDS[0]
 
   const { scope, priorScope, filter } = useMemo(() => {
-    const f = { industries: filters.industries, products: filters.products, months: filters.months }
+    const f = { industries: filters.industries, products: filters.products, channels: filters.channels, months: filters.months }
     return {
       filter: f,
       scope: buildScope(dashboard.id, f),
       priorScope: buildScope(dashboard.id, { ...f, months: priorWindow(filters.months) }),
     }
-  }, [dashboard.id, filters.industries, filters.products, filters.months])
+  }, [dashboard.id, filters.industries, filters.products, filters.channels, filters.months])
 
   const Custom = CUSTOM[dashboard.id]
 

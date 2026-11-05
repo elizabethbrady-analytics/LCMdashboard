@@ -78,7 +78,7 @@ function ReactivationDashboard({ dashId, segment, segKpiKeys, scope, priorScope,
 
   const flows = useMemo(
     () =>
-      migrationMatrix({ industries: filter.industries, products: filter.products, months: filter.months })
+      migrationMatrix({ industries: filter.industries, products: filter.products, channels: filter.channels, months: filter.months })
         .filter((f) => f.from === segment),
     [filter, segment],
   )

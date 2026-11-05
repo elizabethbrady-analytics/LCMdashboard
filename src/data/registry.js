@@ -206,7 +206,7 @@ function commonExecRows(dash, opts = {}) {
       definition: 'Total activation rate PLCC; total activation rate PL. OPEN: definition of "activation" at the product level to be confirmed.',
       measure: 'Rate per product',
       source: SRC.apps,
-      eq: { text: 'activated on product ÷ enrolled on product, for PLCC, PayLater, and ISV separately', parts: [['PLCC activation rate', 'plccRate', 'pct'], ['PL activation rate', 'plRate', 'pct'], ['ISV activation rate', 'isvRate', 'pct']], calc: (s) => s.plccRate, fmtKind: 'pct' },
+      eq: { text: 'activated on product ÷ enrolled on product, for PLCC and PayLater separately', parts: [['PLCC activation rate', 'plccRate', 'pct'], ['PL activation rate', 'plRate', 'pct']], calc: (s) => s.plccRate, fmtKind: 'pct' },
     },
   ]
   if (opts.avgTrans) {

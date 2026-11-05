@@ -33,7 +33,7 @@ const div = (a, b) => (b ? a / b : 0)
 export function buildScope(dashboardId, filters = {}) {
   const segments = DASHBOARD_SEGMENTS[dashboardId] ?? SEGMENTS
   const months = filters.months ?? MONTHS
-  const base = { industries: filters.industries, products: filters.products }
+  const base = { industries: filters.industries, products: filters.products, channels: filters.channels }
   const f = { ...base, segments, months }
 
   const a = agg(f)
@@ -45,9 +45,8 @@ export function buildScope(dashboardId, filters = {}) {
   const voc = sentiment({ ...f, segments })
 
   // Product split (independent of any product filter, so the split is always visible)
-  const plcc = agg({ industries: filters.industries, segments, months, products: ['PLCC'] })
-  const pl = agg({ industries: filters.industries, segments, months, products: ['PL'] })
-  const isv = agg({ industries: filters.industries, segments, months, products: ['ISV'] })
+  const plcc = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PLCC'] })
+  const pl = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PL'] })
 
   // Migration flows involving this scope's segments
   const flows = migrationMatrix({ ...base, months })
@@ -96,10 +95,8 @@ export function buildScope(dashboardId, filters = {}) {
     // product split
     plccRate: div(plcc.active, plcc.providers),
     plRate: div(pl.active, pl.providers),
-    isvRate: div(isv.active, isv.providers),
     plccNcs: plcc.ncs,
     plNcs: pl.ncs,
-    isvNcs: isv.ncs,
     // migration
     movedUp, movedDown, retained,
     // derived dollars

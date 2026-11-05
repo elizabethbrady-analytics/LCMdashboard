@@ -22,7 +22,7 @@ function IndustryTable({ filter }) {
   const rows = useMemo(
     () =>
       INDUSTRIES.map((ind) => {
-        const a = agg({ segments: ['Newly Enrolled'], industries: [ind], products: filter.products, months: filter.months })
+        const a = agg({ segments: ['Newly Enrolled'], industries: [ind], products: filter.products, channels: filter.channels, months: filter.months })
         const t = ttv({ industries: [ind] })
         return {
           industry: ind,

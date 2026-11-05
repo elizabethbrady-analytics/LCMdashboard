@@ -1,6 +1,6 @@
 // Seeded synthetic data engine.
 //
-// Generates a monthly cube: segment × industry × product × month, then exposes
+// Generates a monthly cube: segment × industry × product × channel × month, then exposes
 // query helpers that the dashboards and the methodology panel's worked
 // equations share — so the number on a chart and the numbers substituted into
 // its equation always agree.
@@ -31,7 +31,8 @@ export const SEGMENT_COLORS = {
 }
 
 export const INDUSTRIES = ['Dental', 'Vision', 'Veterinary', 'Cosmetic', 'Audiology', 'Wellness']
-export const PRODUCTS = ['PLCC', 'PL', 'ISV']
+export const PRODUCTS = ['PLCC', 'PL']
+export const CHANNELS = ['Provider Center', 'ISV', 'QR Code']
 
 // Months Jan 2025 → Jul 2026 inclusive
 export const MONTHS = (() => {
@@ -64,12 +65,49 @@ const INDUSTRY_MIX = {
   Dormant: { Dental: 0.18, Vision: 0.18, Veterinary: 0.07, Cosmetic: 0.14, Audiology: 0.18, Wellness: 0.25 },
 }
 
-const PRODUCT_SHARE = { PLCC: 0.66, PL: 0.26, ISV: 0.08 }
+const PRODUCT_SHARE = { PLCC: 0.72, PL: 0.28 }
+
+// Channel mix per segment (synthetic). Shares sum to 1 per segment, so with the
+// Channel filter on "All channels" the totals are unchanged by the split.
+const CHANNEL_SHARE = {
+  'Newly Enrolled': { 'Provider Center': 0.46, ISV: 0.24, 'QR Code': 0.3 },
+  Stars: { 'Provider Center': 0.58, ISV: 0.31, 'QR Code': 0.11 },
+  Consistent: { 'Provider Center': 0.55, ISV: 0.3, 'QR Code': 0.15 },
+  'Engagement Exposures': { 'Provider Center': 0.52, ISV: 0.28, 'QR Code': 0.2 },
+  'Needs Attention': { 'Provider Center': 0.5, ISV: 0.27, 'QR Code': 0.23 },
+  Dormant: { 'Provider Center': 0.5, ISV: 0.25, 'QR Code': 0.25 },
+}
+// Activity over/under-index by channel, so rates (not just volumes) differ.
+const CHANNEL_TILT = { 'Provider Center': 1.0, ISV: 1.12, 'QR Code': 0.82 }
+const ACTIVITY_FIELDS = new Set([
+  'active', 'appActive', 'salesActive', 'fullyActive', 'apps', 'approvals',
+  'transactions', 'ncs', 'newCH', 'firstTransIn30', 'firstTransIn90',
+  'firstPurchases', 'conversions', 'mqls', 'handRaisers', 'repeatApps',
+  'repeatTrans', 'reactivated',
+])
+const SPLIT_FIELDS = [
+  'providers', 'inJourney', 'qualified', 'active', 'appActive', 'salesActive',
+  'fullyActive', 'apps', 'approvals', 'transactions', 'ncs', 'newCH',
+  'firstTransIn30', 'firstTransIn90', 'firstPurchases', 'emailsSent', 'delivered',
+  'opens', 'clicks', 'unsubs', 'conversions', 'mqls', 'handRaisers', 'repeatApps',
+  'repeatTrans', 'inactive', 'reactivated',
+]
+
+/** Split an integer across weights so the parts always sum to the total. */
+function splitInt(total, weights) {
+  const wSum = weights.reduce((a, b) => a + b, 0)
+  const raw = weights.map((w) => (total * w) / wSum)
+  const out = raw.map(Math.floor)
+  let rem = total - out.reduce((a, b) => a + b, 0)
+  const order = raw.map((v, i) => [v - out[i], i]).sort((a, b) => b[0] - a[0])
+  for (let k = 0; rem > 0; k = (k + 1) % order.length, rem--) out[order[k][1]]++
+  return out
+}
 
 // Mild seasonality (elective care dips mid-summer/December, spikes Q1/Q4-start)
 const SEASON = [1.06, 1.02, 1.04, 1.0, 0.98, 0.94, 0.92, 0.96, 1.02, 1.05, 1.03, 0.9]
 
-/** The cube: rows keyed `${segment}|${industry}|${product}|${month}` */
+/** The cube: rows keyed segment × industry × product × channel × month */
 function buildCube() {
   const rows = []
   for (const seg of SEGMENTS) {
@@ -118,14 +156,44 @@ function buildCube() {
           // the doc targets (reactivation conversion 8–20% depending on segment)
           const inactive = Math.round(providers * (seg === 'Needs Attention' ? 0.62 : seg === 'Dormant' ? 0.94 : 0.1))
           const reactivated = Math.round(inactive * (seg === 'Needs Attention' ? range(rng, 0.008, 0.014) : seg === 'Dormant' ? range(rng, 0.0015, 0.0035) : range(rng, 0.004, 0.008)))
-          rows.push({
-            segment: seg, industry: ind, product: prod, month,
+          const cell = {
             providers, inJourney, qualified, active, appActive, salesActive,
             fullyActive, apps, approvals, transactions,
             ncs, newCH, firstTransIn30, firstTransIn90, firstPurchases,
             emailsSent, delivered, opens, clicks, unsubs,
             conversions, mqls, handRaisers, repeatApps, repeatTrans,
             inactive, reactivated,
+          }
+          // Split the cell across channels (separate rng so the draws above are
+          // untouched). Each field's parts sum exactly to the original value.
+          const chRng = mulberry32(hashString(`lcm-ch|${seg}|${ind}|${prod}|${month}`))
+          const w = CHANNELS.map((c) => CHANNEL_SHARE[seg][c] * range(chRng, 0.94, 1.06))
+          // Tilt fades as a cell nears 100% active, so no channel can be pushed
+          // past its own provider count.
+          const headroom = 1 - Math.min(1, cell.active / Math.max(1, cell.providers))
+          const wAct = CHANNELS.map((c, i) => w[i] * (1 + (CHANNEL_TILT[c] - 1) * headroom))
+          const parts = {}
+          for (const f of SPLIT_FIELDS) {
+            parts[f] = splitInt(cell[f], ACTIVITY_FIELDS.has(f) ? wAct : w)
+          }
+          // Safety net: active can never exceed providers within a channel.
+          for (let i = 0; i < CHANNELS.length; i++) {
+            let excess = parts.active[i] - parts.providers[i]
+            while (excess > 0) {
+              let j = -1, best = 0
+              for (let k = 0; k < CHANNELS.length; k++) {
+                const room = parts.providers[k] - parts.active[k]
+                if (k !== i && room > best) { best = room; j = k }
+              }
+              if (j < 0) break
+              const mv = Math.min(excess, best)
+              parts.active[i] -= mv; parts.active[j] += mv; excess -= mv
+            }
+          }
+          CHANNELS.forEach((channel, ci) => {
+            const row = { segment: seg, industry: ind, product: prod, channel, month }
+            for (const f of SPLIT_FIELDS) row[f] = parts[f][ci]
+            rows.push(row)
           })
         })
       }
@@ -149,15 +217,16 @@ const SUM_FIELDS = [
 
 /**
  * Aggregate the cube under a filter.
- * filter: { segments?, industries?, products?, months? } — arrays or undefined (= all)
+ * filter: { segments?, industries?, products?, channels?, months? } — arrays or undefined (= all)
  */
 export function agg(filter = {}) {
-  const segs = filter.segments, inds = filter.industries, prods = filter.products, months = filter.months
+  const segs = filter.segments, inds = filter.industries, prods = filter.products, chans = filter.channels, months = filter.months
   const out = Object.fromEntries(SUM_FIELDS.map((f) => [f, 0]))
   for (const r of CUBE) {
     if (segs && !segs.includes(r.segment)) continue
     if (inds && !inds.includes(r.industry)) continue
     if (prods && !prods.includes(r.product)) continue
+    if (chans && !chans.includes(r.channel)) continue
     if (months && !months.includes(r.month)) continue
     for (const f of SUM_FIELDS) out[f] += r[f]
   }
@@ -204,7 +273,7 @@ export function activationBuckets(filter = {}, scopeKey = 'act') {
 
 /** Segment migration matrix (prior period → current period) for sankey/tables. */
 export function migrationMatrix(filter = {}) {
-  const rng = scopeRng('mig' + JSON.stringify([filter.industries, filter.products, (filter.months ?? []).join(',')]))
+  const rng = scopeRng('mig' + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : []), (filter.months ?? []).join(',')]))
   // Stay-rates on the diagonal; movement mass distributed to neighbors.
   const stay = { 'Newly Enrolled': 0.0, Stars: 0.84, Consistent: 0.78, 'Engagement Exposures': 0.72, 'Needs Attention': 0.74, Dormant: 0.88 }
   const flows = []
@@ -328,7 +397,7 @@ const OTHER_STATES = [
 ]
 
 export function stateBreakdown(filter = {}, scopeKey = 'geo') {
-  const rng = scopeRng(scopeKey + JSON.stringify([filter.industries, filter.products]))
+  const rng = scopeRng(scopeKey + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : [])]))
   const a = agg(filter)
   const entries = [
     ...Object.entries(STATE_WEIGHTS),
