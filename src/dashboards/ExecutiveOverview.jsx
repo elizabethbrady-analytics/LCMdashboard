@@ -16,14 +16,13 @@ import BucketTable from '../components/BucketTable'
 const D = 'executive-overview'
 const m = (key) => byId[`${D}.${key}`]
 
-const PRODUCT_COLORS = { PLCC: '#0e5b4a', PayLater: '#2f6bb0', ISV: '#b57614' }
+const PRODUCT_COLORS = { PLCC: '#0e5b4a', PayLater: '#2f6bb0' }
 
 function ProductMixBar({ scope }) {
-  const total = scope.plccNcs + scope.plNcs + scope.isvNcs || 1
+  const total = scope.plccNcs + scope.plNcs || 1
   const parts = [
     ['PLCC', scope.plccNcs],
     ['PayLater', scope.plNcs],
-    ['ISV', scope.isvNcs],
   ]
   return (
     <div className="mig-summary">
@@ -46,10 +45,6 @@ function ProductMixBar({ scope }) {
             </span>
           ))}
         </div>
-      </div>
-      <div className="matrix-note">
-        Combined (PLCC + PayLater): {applyFmt('pct', (scope.plccNcs + scope.plNcs) / total)} of NCS ·{' '}
-        {applyFmt('usd', scope.plccNcs + scope.plNcs)}
       </div>
     </div>
   )
