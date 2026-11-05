@@ -396,6 +396,14 @@ const execView = [
     eq: { text: 'NCS per product ÷ total NCS', parts: [['PLCC NCS', 'plccNcs', 'usd'], ['PayLater NCS', 'plNcs', 'usd']], calc: (s) => s.plccNcs / (s.plccNcs + s.plNcs), fmtKind: 'pct' },
   },
   {
+    id: `${EXEC}.channelmix`, dashboard: EXEC, module: 'Executive View', name: 'Total channel mix (Provider Center / ISV / QR Code)', viz: '100% stacked bar',
+    plain: 'How Net Credit Sales split across enrollment channels — Provider Center, ISV, and QR Code.',
+    definition: 'NCS share by channel: Provider Center, ISV, and QR Code.',
+    measure: '% share per channel',
+    source: SRC.trx,
+    eq: { text: 'NCS per channel ÷ total NCS', parts: [['Provider Center NCS', 'pcNcs', 'usd'], ['ISV NCS', 'isvNcs', 'usd'], ['QR Code NCS', 'qrNcs', 'usd']], calc: (s) => s.pcNcs / (s.pcNcs + s.isvNcs + s.qrNcs), fmtKind: 'pct' },
+  },
+  {
     id: `${EXEC}.or`, dashboard: EXEC, module: 'Executive View', name: 'Overall OR %', viz: 'scorecard',
     plain: 'Across all journeys, the share of delivered emails that got opened.',
     definition: 'Open rate across all journey sends.',

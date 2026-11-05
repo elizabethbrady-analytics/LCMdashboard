@@ -48,6 +48,12 @@ export function buildScope(dashboardId, filters = {}) {
   const plcc = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PLCC'] })
   const pl = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PL'] })
 
+  // Channel split (independent of any channel filter, so the split is always visible)
+  const chAgg = (c) => agg({ industries: filters.industries, products: filters.products, segments, months, channels: [c] })
+  const pcCh = chAgg('Provider Center')
+  const isvCh = chAgg('ISV')
+  const qrCh = chAgg('QR Code')
+
   // Migration flows involving this scope's segments
   const flows = migrationMatrix({ ...base, months })
   let movedUp = 0
@@ -97,6 +103,10 @@ export function buildScope(dashboardId, filters = {}) {
     plRate: div(pl.active, pl.providers),
     plccNcs: plcc.ncs,
     plNcs: pl.ncs,
+    // channel split
+    pcNcs: pcCh.ncs,
+    isvNcs: isvCh.ncs,
+    qrNcs: qrCh.ncs,
     // migration
     movedUp, movedDown, retained,
     // derived dollars

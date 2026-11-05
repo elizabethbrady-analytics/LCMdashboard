@@ -17,13 +17,11 @@ const D = 'executive-overview'
 const m = (key) => byId[`${D}.${key}`]
 
 const PRODUCT_COLORS = { PLCC: '#0e5b4a', PayLater: '#2f6bb0' }
+const CHANNEL_COLORS = { 'Provider Center': '#2a7f9e', ISV: '#b57614', 'QR Code': '#8a5fb5' }
 
-function ProductMixBar({ scope }) {
-  const total = scope.plccNcs + scope.plNcs || 1
-  const parts = [
-    ['PLCC', scope.plccNcs],
-    ['PayLater', scope.plNcs],
-  ]
+// 100% stacked bar of NCS share across a set of [name, ncs] parts
+function MixBar({ parts, colors }) {
+  const total = parts.reduce((sum, [, v]) => sum + v, 0) || 1
   return (
     <div className="mig-summary">
       <div className="mig-row">
@@ -33,20 +31,38 @@ function ProductMixBar({ scope }) {
             <div
               key={name}
               className="mig-seg"
-              style={{ width: `${(v / total) * 100}%`, background: PRODUCT_COLORS[name] }}
+              style={{ width: `${(v / total) * 100}%`, background: colors[name] }}
               title={`${name}: ${applyFmt('usd', v)} (${applyFmt('pct', v / total)})`}
             />
           ))}
         </div>
         <div className="mig-pcts">
           {parts.map(([name, v]) => (
-            <span key={name} style={{ color: PRODUCT_COLORS[name], fontWeight: 600 }}>
+            <span key={name} style={{ color: colors[name], fontWeight: 600 }}>
               {name} {applyFmt('pct', v / total)}
             </span>
           ))}
         </div>
       </div>
     </div>
+  )
+}
+
+function ProductMixBar({ scope }) {
+  return (
+    <MixBar
+      colors={PRODUCT_COLORS}
+      parts={[['PLCC', scope.plccNcs], ['PayLater', scope.plNcs]]}
+    />
+  )
+}
+
+function ChannelMixBar({ scope }) {
+  return (
+    <MixBar
+      colors={CHANNEL_COLORS}
+      parts={[['Provider Center', scope.pcNcs], ['ISV', scope.isvNcs], ['QR Code', scope.qrNcs]]}
+    />
   )
 }
 
@@ -123,6 +139,11 @@ export default function ExecutiveOverview({ scope, priorScope, filter }) {
       <MetricCard metricId={m('productmix').id} className="card chart-card">
         <div className="module-title">Total product mix — NCS share by product</div>
         <ProductMixBar scope={scope} />
+      </MetricCard>
+
+      <MetricCard metricId={m('channelmix').id} className="card chart-card">
+        <div className="module-title">Total channel mix — NCS share by channel</div>
+        <ChannelMixBar scope={scope} />
       </MetricCard>
 
       <div className="row-split">
