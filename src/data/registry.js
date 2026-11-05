@@ -340,7 +340,7 @@ const execView = [
     eq: { text: 'unsubscribes ÷ emails delivered', parts: [['Unsubscribes', 'unsubs', 'num'], ['Emails delivered', 'emailsSent', 'num']], calc: (s) => s.unsubs / s.emailsSent, fmtKind: 'pct' },
   },
   {
-    id: `${EXEC}.appsper`, dashboard: EXEC, module: 'Executive View', name: 'Avg app / active provider', viz: 'scorecard+trend',
+    id: `${EXEC}.appsper`, dashboard: EXEC, module: 'Executive View', name: 'Avg apps / active provider', viz: 'scorecard+trend',
     plain: 'On average, how many applications each active provider submitted.',
     definition: 'Applications ÷ active providers.',
     measure: 'Avg per provider; total overall',
