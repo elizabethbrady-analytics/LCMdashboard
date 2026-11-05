@@ -140,7 +140,7 @@ function ReactivationDashboard({ dashId, segment, segKpiKeys, scope, priorScope,
       <section className="card">
         <div className="module-title">Executive View</div>
         <div className="metric-grid">
-          {['subs', 'ncs', 'ncslift', 'ncsperactive', 'transperactive', 'repeattrans', 'appsper', 'repeat', 'mql', 'hand', 'product'].map((k) => (
+          {['subs', 'ncs', 'ncslift', 'ncsperactive', 'repeattrans', 'appsper', 'transperactive', 'repeat', 'mql', 'hand', 'product'].map((k) => (
             <Scorecard key={k} metric={m(k)} scope={scope} priorScope={priorScope} />
           ))}
         </div>

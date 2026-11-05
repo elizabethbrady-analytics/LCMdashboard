@@ -168,6 +168,14 @@ function commonExecRows(dash, opts = {}) {
       source: SRC.apps,
       eq: { text: 'applications ÷ active providers', parts: [['Applications', 'apps', 'num'], ['Active providers', 'active', 'num']], calc: (s) => s.apps / s.active, fmtKind: 'num1' },
     },
+    ...(opts.noTransPer ? [] : [{
+      id: `${dash}.transper`, dashboard: dash, module: m, name: 'Transactions per active provider', viz: 'scorecard',
+      plain: 'On average, how many transactions each active provider ran.',
+      definition: 'Transactions ÷ active providers.',
+      measure: 'Avg per provider; total overall',
+      source: SRC.trx,
+      eq: { text: 'transactions ÷ active providers', parts: [['Transactions', 'transactions', 'num'], ['Active providers', 'active', 'num']], calc: (s) => s.transactions / s.active, fmtKind: 'num1' },
+    }]),
     {
       id: `${dash}.repeat`, dashboard: dash, module: m, name: 'Repeat app %', viz: 'scorecard',
       plain: 'Of all applications, the share that came from providers applying more than once.',
@@ -679,7 +687,7 @@ const eeRows = [
 // come from this factory; each dashboard adds its own segment KPIs.
 function reactivationRows(dash, segLabel) {
   return [
-    ...commonExecRows(dash, { avgTrans: true, moduleName: 'Executive View', migrationDef: 'Movement view: stayed / moved up, etc.' }),
+    ...commonExecRows(dash, { avgTrans: true, noTransPer: true, moduleName: 'Executive View', migrationDef: 'Movement view: stayed / moved up, etc.' }),
     {
       id: `${dash}.reactrate`, dashboard: dash, module: 'Executive View', name: 'Reactivation rate', viz: 'scorecard', concept: 'reactivation-rate',
       plain: `Of the inactive ${segLabel} providers, the share that came back — sales active and/or app active.`,
@@ -705,7 +713,7 @@ function reactivationRows(dash, segLabel) {
       eq: { text: 'Net Credit Sales ÷ active providers', parts: [['Net Credit Sales', 'ncs', 'usd'], ['Active providers', 'active', 'num']], calc: (s) => s.ncs / s.active, fmtKind: 'usd' },
     },
     {
-      id: `${dash}.transperactive`, dashboard: dash, module: 'Executive View', name: 'Avg # transactions / active provider', viz: 'scorecard', origin: FB_R86,
+      id: `${dash}.transperactive`, dashboard: dash, module: 'Executive View', name: 'Transactions per active provider', viz: 'scorecard', origin: FB_R86,
       plain: 'On average, how many transactions each active provider ran.',
       definition: 'Transactions ÷ active providers.',
       measure: 'Avg per provider',
