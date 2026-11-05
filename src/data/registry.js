@@ -209,11 +209,12 @@ function commonExecRows(dash, opts = {}) {
       eq: { text: 'providers per destination segment ÷ providers at period start', parts: [['Providers at period start', 'providers', 'num']], calc: (s) => s.providers, fmtKind: 'num' },
     },
     {
-      id: `${dash}.product`, dashboard: dash, module: m, name: opts.productName ?? 'Product activation (PLCC vs PL)', viz: 'scorecards',
+      id: `${dash}.product`, dashboard: dash, module: m, name: opts.productName ?? 'Product activation (PLCC vs PL)', viz: 'two scorecards (PLCC, PL)',
       plain: 'Activation split by product: private label credit card vs Pay Later.',
       definition: 'Total activation rate PLCC; total activation rate PL. OPEN: definition of "activation" at the product level to be confirmed.',
       measure: 'Rate per product',
       source: SRC.apps,
+      split: [{ label: 'PLCC', key: 'plccRate' }, { label: 'PL (Pay Later)', key: 'plRate' }],
       eq: { text: 'activated on product ÷ enrolled on product, for PLCC and PayLater separately', parts: [['PLCC activation rate', 'plccRate', 'pct'], ['PL activation rate', 'plRate', 'pct']], calc: (s) => s.plccRate, fmtKind: 'pct' },
     },
   ]

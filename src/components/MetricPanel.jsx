@@ -74,7 +74,13 @@ export default function MetricPanel({ scope }) {
           <div className="equation">
             <div className="eq-line eq-words">{metric.name} = {metric.eq.text}</div>
             {sub !== metric.eq.text && <div className="eq-line eq-sub">= {sub}</div>}
-            <div className="eq-line eq-result">= {applyFmt(metric.eq.fmtKind, value)}</div>
+            {metric.split ? (
+              metric.split.map(({ label, key }) => (
+                <div className="eq-line eq-result" key={key}>{label} = {applyFmt(metric.eq.fmtKind, scope[key])}</div>
+              ))
+            ) : (
+              <div className="eq-line eq-result">= {applyFmt(metric.eq.fmtKind, value)}</div>
+            )}
           </div>
           {metric.modeled && (
             <div className="modeled-note">
