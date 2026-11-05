@@ -388,12 +388,12 @@ const execView = [
     eq: { text: '(providers this period − prior period) ÷ prior period, per segment', parts: [['Providers this period', 'providers', 'num'], ['Providers prior period', 'priorProviders', 'num']], calc: (s) => (s.providers - s.priorProviders) / s.priorProviders, fmtKind: 'pct' },
   },
   {
-    id: `${EXEC}.productmix`, dashboard: EXEC, module: 'Executive View', name: 'Total product mix (PLCC / PayLater / ISV)', viz: '100% stacked bar', origin: FB_K85,
-    plain: 'How Net Credit Sales split across products — PLCC, PayLater, ISV, and the PLCC+PL combined share.',
-    definition: 'NCS share by product: PLCC, PayLater, Combined (PLCC + PL), and ISV.',
+    id: `${EXEC}.productmix`, dashboard: EXEC, module: 'Executive View', name: 'Total product mix (PLCC / PayLater)', viz: '100% stacked bar', origin: FB_K85,
+    plain: 'How Net Credit Sales split across products — PLCC and PayLater.',
+    definition: 'NCS share by product: PLCC and PayLater.',
     measure: '% share per product',
     source: SRC.trx,
-    eq: { text: 'NCS per product ÷ total NCS', parts: [['PLCC NCS', 'plccNcs', 'usd'], ['PayLater NCS', 'plNcs', 'usd'], ['ISV NCS', 'isvNcs', 'usd']], calc: (s) => s.plccNcs / (s.plccNcs + s.plNcs + s.isvNcs), fmtKind: 'pct' },
+    eq: { text: 'NCS per product ÷ total NCS', parts: [['PLCC NCS', 'plccNcs', 'usd'], ['PayLater NCS', 'plNcs', 'usd']], calc: (s) => s.plccNcs / (s.plccNcs + s.plNcs), fmtKind: 'pct' },
   },
   {
     id: `${EXEC}.or`, dashboard: EXEC, module: 'Executive View', name: 'Overall OR %', viz: 'scorecard',
