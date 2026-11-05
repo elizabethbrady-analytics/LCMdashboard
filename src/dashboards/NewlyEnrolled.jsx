@@ -122,7 +122,7 @@ export default function NewlyEnrolled({ scope, priorScope, filter }) {
       <section className="card">
         <div className="module-title">Account quality & demand</div>
         <div className="metric-grid">
-          {[dd('approval'), dd('newch'), dd('ch30'), dd('firsttrans'), dd('ncsavg'), m('ncsperact'), m('firstch'), m('appsper'), m('transper'), m('mql'), m('hand'), m('migration')].map((metric) => (
+          {[dd('approval'), dd('newch'), dd('ch30'), dd('firsttrans'), dd('ncsavg'), m('ncsperact'), m('firstch'), m('appsper'), m('transper'), m('mql'), m('hand'), m('handopen'), m('migration')].map((metric) => (
             <Scorecard key={metric.id} metric={metric} scope={scope} priorScope={priorScope} />
           ))}
         </div>

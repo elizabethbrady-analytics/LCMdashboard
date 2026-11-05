@@ -209,6 +209,14 @@ function commonExecRows(dash, opts = {}) {
       eq: { text: 'count of hand raisers this period', parts: [['Hand raisers', 'handRaisers', 'num']], calc: (s) => s.handRaisers, fmtKind: 'num' },
     },
     {
+      id: `${dash}.handopen`, dashboard: dash, module: m, name: 'Hand raiser to open rate', viz: 'scorecard',
+      plain: 'For every unique open of a journey email, how many unique hand raisers were generated.',
+      definition: 'Number of unique hand raisers ÷ number of unique opens across journey sends.',
+      measure: '% overall',
+      source: SRC.sfdc,
+      eq: { text: 'unique hand raisers ÷ unique opens', parts: [['Unique hand raisers', 'handRaisers', 'num'], ['Unique opens', 'opens', 'num']], calc: (s) => s.handRaisers / s.opens, fmtKind: 'pct2' },
+    },
+    {
       id: `${dash}.migration`, dashboard: dash, module: m, name: 'Segment migration', viz: 'highlight table / destination bars',
       plain: 'Where providers in this journey moved in segmentation — stayed, moved up, or dropped.',
       definition: opts.migrationDef ?? 'Movement between the segmentation model segments: prior period vs current period, count and % per destination.',
@@ -403,6 +411,14 @@ const execView = [
     measure: 'Total overall',
     source: SRC.sfdc,
     eq: { text: 'count of hand raisers this period', parts: [['Hand raisers', 'handRaisers', 'num']], calc: (s) => s.handRaisers, fmtKind: 'num' },
+  },
+  {
+    id: `${EXEC}.handopen`, dashboard: EXEC, module: 'Executive View', name: 'Hand raiser to open rate', viz: 'scorecard',
+    plain: 'Across all journeys, for every unique open of an email, how many unique hand raisers were generated.',
+    definition: 'Number of unique hand raisers ÷ number of unique opens across all journey sends.',
+    measure: '% overall',
+    source: SRC.sfdc,
+    eq: { text: 'unique hand raisers ÷ unique opens', parts: [['Unique hand raisers', 'handRaisers', 'num'], ['Unique opens', 'opens', 'num']], calc: (s) => s.handRaisers / s.opens, fmtKind: 'pct2' },
   },
   {
     id: `${EXEC}.migration`, dashboard: EXEC, module: 'Executive View', name: 'Segment migration', viz: 'highlight table + scorecards',

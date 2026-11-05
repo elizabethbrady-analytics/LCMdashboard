@@ -4,6 +4,7 @@ export const fmt = {
   usd: (v) => (v == null || Number.isNaN(v) ? '—' : '$' + Math.round(v).toLocaleString('en-US')),
   usdM: (v) => (v == null || Number.isNaN(v) ? '—' : '$' + (v / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M'),
   pct: (v) => (v == null || Number.isNaN(v) ? '—' : (v * 100).toLocaleString('en-US', { maximumFractionDigits: 1 }) + '%'),
+  pct2: (v) => (v == null || Number.isNaN(v) ? '—' : (v * 100).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + '%'),
   pct0: (v) => (v == null || Number.isNaN(v) ? '—' : Math.round(v * 100) + '%'),
   days: (v) => (v == null || Number.isNaN(v) ? '—' : Math.round(v) + ' days'),
   score: (v) => (v == null || Number.isNaN(v) ? '—' : String(v)),
