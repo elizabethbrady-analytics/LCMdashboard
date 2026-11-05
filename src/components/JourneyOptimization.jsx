@@ -50,7 +50,7 @@ export default function JourneyOptimization({ dashId, scope, priorScope, filter,
     <section className="card">
       <div className="module-title">Journey Optimization</div>
       <div className="metric-grid" style={{ marginBottom: 16 }}>
-        {['delivery', 'or', 'ctor', 'unsub', 'conv'].map((k) => (
+        {['delivery', 'or', 'ctor', 'unsub', 'unsubclick', 'conv'].map((k) => (
           <Scorecard key={k} metric={m(k)} scope={scope} priorScope={priorScope} />
         ))}
       </div>

@@ -130,7 +130,7 @@ export default function ExecutiveOverview({ scope, priorScope, filter }) {
       <section className="card">
         <div className="module-title">Demand & email</div>
         <div className="metric-grid">
-          {['mql', 'hand', 'or', 'ctor', 'unsub'].map((k) => (
+          {['mql', 'hand', 'or', 'ctor', 'unsub', 'unsubclick'].map((k) => (
             <Scorecard key={k} metric={m(k)} scope={scope} priorScope={priorScope} />
           ))}
         </div>

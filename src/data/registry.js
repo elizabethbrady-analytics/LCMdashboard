@@ -76,6 +76,14 @@ function joModule(dash) {
       eq: { text: 'unsubscribes ÷ emails delivered', parts: [['Unsubscribes', 'unsubs', 'num'], ['Emails delivered', 'emailsSent', 'num']], calc: (s) => s.unsubs / s.emailsSent, fmtKind: 'pct' },
     },
     {
+      id: `${dash}.jo.unsubclick`, dashboard: dash, module: m, name: 'Unsubscribe to click rate', viz: 'scorecard',
+      plain: 'Of the people who clicked a journey email, how many unsubscribed — a read on whether engaged recipients are opting out.',
+      definition: 'Number of unsubscribes ÷ number of unique clicks across journey sends.',
+      measure: '% overall',
+      source: SRC.mktc,
+      eq: { text: 'unsubscribes ÷ unique clicks', parts: [['Unsubscribes', 'unsubs', 'num'], ['Unique clicks', 'clicks', 'num']], calc: (s) => s.unsubs / s.clicks, fmtKind: 'pct' },
+    },
+    {
       id: `${dash}.jo.conv`, dashboard: dash, module: m, name: 'Conversion rate (to desired goal)', viz: 'scorecard',
       plain: 'Of the providers who clicked, the share that completed the journey’s goal action.',
       definition: 'Journey members completing the desired goal action ÷ clickers.',
@@ -347,6 +355,14 @@ const execView = [
     measure: '% overall',
     source: SRC.mktc,
     eq: { text: 'unsubscribes ÷ emails delivered', parts: [['Unsubscribes', 'unsubs', 'num'], ['Emails delivered', 'emailsSent', 'num']], calc: (s) => s.unsubs / s.emailsSent, fmtKind: 'pct' },
+  },
+  {
+    id: `${EXEC}.unsubclick`, dashboard: EXEC, module: 'Executive View', name: 'Unsubscribe to click rate', viz: 'scorecard',
+    plain: 'Across all journeys, of the people who clicked an email, how many unsubscribed.',
+    definition: 'Number of unsubscribes ÷ number of unique clicks across all journey sends.',
+    measure: '% overall',
+    source: SRC.mktc,
+    eq: { text: 'unsubscribes ÷ unique clicks', parts: [['Unsubscribes', 'unsubs', 'num'], ['Unique clicks', 'clicks', 'num']], calc: (s) => s.unsubs / s.clicks, fmtKind: 'pct' },
   },
   {
     id: `${EXEC}.appsper`, dashboard: EXEC, module: 'Executive View', name: 'Avg apps / active provider', viz: 'scorecard+trend',
