@@ -509,6 +509,22 @@ const neExec = [
     eq: { text: 'count of cardholder first transactions', parts: [['First purchases', 'firstPurchases', 'num']], calc: (s) => s.firstPurchases, fmtKind: 'num' },
   },
   {
+    id: `${NE}.repeatch`, dashboard: NE, module: 'Executive / Funnel', name: 'Repeat Transactions per CH', viz: 'scorecard',
+    plain: 'Repeat purchases by new cardholders, after their first transaction, this period.',
+    definition: 'Cardholder repeat transactions in the period (second and later transactions on a cardholder account).',
+    measure: 'Total',
+    source: src('Repeat transaction records for new cardholder accounts', 'DWH (application + transaction join)'),
+    eq: { text: 'count of cardholder repeat transactions', parts: [['Repeat transactions', 'repeatTrans', 'num']], calc: (s) => s.repeatTrans, fmtKind: 'num' },
+  },
+  {
+    id: `${NE}.avgtranspch`, dashboard: NE, module: 'Executive / Funnel', name: 'Avg # Transactions per CH', viz: 'scorecard',
+    plain: 'On average, how many transactions each new cardholder ran — first and repeat combined.',
+    definition: 'All cardholder transactions (first + repeat) ÷ new cardholder accounts.',
+    measure: 'Avg per cardholder',
+    source: src('First and repeat transaction records for new cardholder accounts', 'DWH (application + transaction join)'),
+    eq: { text: '(first transactions + repeat transactions) ÷ new cardholder accounts', parts: [['First transactions', 'firstPurchases', 'num'], ['Repeat transactions', 'repeatTrans', 'num'], ['New CH accounts', 'newCH', 'num']], calc: (s) => (s.firstPurchases + s.repeatTrans) / s.newCH, fmtKind: 'num1' },
+  },
+  {
     id: `${NE}.ttvapp`, dashboard: NE, module: 'Executive / Funnel', name: 'TTV-App', viz: 'scorecard',
     plain: 'The average number of days from enrollment to a provider’s first application.',
     definition: 'Avg days enrollment → 1st application.',
