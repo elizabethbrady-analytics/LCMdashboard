@@ -343,6 +343,28 @@ export function topUrls(filter = {}, scopeKey = 'urls') {
     .slice(0, 5)
 }
 
+/**
+ * Sales active rate by month vs the same month a year earlier.
+ * The cube starts Jan 2025, so prior-year values for 2025 months are modeled
+ * (deterministic, slightly below the current rate) — for this chart only.
+ */
+export function salesActiveYoY(filter = {}) {
+  const months = filter.months ?? MONTHS
+  const rateFor = (m) => {
+    const a = agg({ ...filter, months: [m] })
+    return a.providers ? a.salesActive / a.providers : 0
+  }
+  return months.map((month) => {
+    const current = rateFor(month)
+    const priorMonth = `${Number(month.slice(0, 4)) - 1}${month.slice(4)}`
+    if (MONTHS.includes(priorMonth)) {
+      return { month, current, prior: rateFor(priorMonth), priorModeled: false }
+    }
+    const rng = scopeRng(`sa-yoy|${month}|${JSON.stringify(filter.industries ?? [])}`)
+    return { month, current, prior: current * range(rng, 0.88, 1.04), priorModeled: true }
+  })
+}
+
 /** Enrollment source breakdown (sales-led / self-serve / referral / marketing). */
 const ENROLL_SOURCES = [
   ['Sales-led', 0.38], ['Self-serve', 0.27], ['Marketing campaign', 0.23], ['Referral', 0.12],

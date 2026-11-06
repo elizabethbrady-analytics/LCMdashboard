@@ -4,13 +4,13 @@
 
 import { useMemo } from 'react'
 import { byId } from '../data/registry'
-import { agg, activationBuckets, ttv, stateBreakdown, sourceBreakdown, INDUSTRIES } from '../data/synthetic.js'
+import { agg, activationBuckets, ttv, salesActiveYoY, sourceBreakdown, INDUSTRIES } from '../data/synthetic.js'
 import { applyFmt } from '../data/format'
 import MetricCard from '../components/MetricCard'
 import Scorecard from '../components/Scorecard'
 import FunnelStrip from '../components/FunnelStrip'
 import BucketTable from '../components/BucketTable'
-import StateMap from '../components/StateMap'
+import YoYColumnChart from '../components/YoYColumnChart'
 import JourneyOptimization from '../components/JourneyOptimization'
 import VocTiles from '../components/VocTiles'
 
@@ -69,7 +69,7 @@ function IndustryTable({ filter }) {
 export default function NewlyEnrolled({ scope, priorScope, filter }) {
   const segFilter = useMemo(() => ({ ...filter, segments: ['Newly Enrolled'] }), [filter])
   const buckets = useMemo(() => activationBuckets(segFilter, 'ne-act'), [segFilter])
-  const states = useMemo(() => stateBreakdown(segFilter, 'ne-geo'), [segFilter])
+  const salesYoY = useMemo(() => salesActiveYoY(segFilter), [segFilter])
   const sources = useMemo(() => sourceBreakdown(segFilter), [segFilter])
 
   const stages = [
@@ -92,12 +92,12 @@ export default function NewlyEnrolled({ scope, priorScope, filter }) {
           <div className="module-title">Activation funnel</div>
           <FunnelStrip stages={stages} />
         </MetricCard>
-        <MetricCard metricId={dd('location').id} className="card chart-card">
-          <div className="module-title">
-            Practice location — enrolled providers by state
-            <span className="pane-note">granularity & source for review</span>
-          </div>
-          <StateMap data={states} height={330} />
+        <MetricCard metricId={dd('salesactyoy').id} className="card chart-card">
+          <div className="module-title">Sales Active Rate Y/Y</div>
+          <YoYColumnChart data={salesYoY} currentLabel="Sales active rate" priorLabel="Same month prior year" height={300} />
+          {salesYoY.some((d) => d.priorModeled) && (
+            <div className="matrix-note">Prior-year values for months before Jan 2026 are modeled (synthetic data).</div>
+          )}
         </MetricCard>
       </div>
 
