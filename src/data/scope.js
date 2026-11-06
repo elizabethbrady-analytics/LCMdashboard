@@ -33,7 +33,7 @@ const div = (a, b) => (b ? a / b : 0)
 export function buildScope(dashboardId, filters = {}) {
   const segments = DASHBOARD_SEGMENTS[dashboardId] ?? SEGMENTS
   const months = filters.months ?? MONTHS
-  const base = { industries: filters.industries, products: filters.products, channels: filters.channels }
+  const base = { industries: filters.industries, products: filters.products, channels: filters.channels, providerTypes: filters.providerTypes }
   const f = { ...base, segments, months }
 
   const a = agg(f)
@@ -45,11 +45,11 @@ export function buildScope(dashboardId, filters = {}) {
   const voc = sentiment({ ...f, segments })
 
   // Product split (independent of any product filter, so the split is always visible)
-  const plcc = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PLCC'] })
-  const pl = agg({ industries: filters.industries, channels: filters.channels, segments, months, products: ['PL'] })
+  const plcc = agg({ industries: filters.industries, channels: filters.channels, providerTypes: filters.providerTypes, segments, months, products: ['PLCC'] })
+  const pl = agg({ industries: filters.industries, channels: filters.channels, providerTypes: filters.providerTypes, segments, months, products: ['PL'] })
 
   // Channel split (independent of any channel filter, so the split is always visible)
-  const chAgg = (c) => agg({ industries: filters.industries, products: filters.products, segments, months, channels: [c] })
+  const chAgg = (c) => agg({ industries: filters.industries, products: filters.products, providerTypes: filters.providerTypes, segments, months, channels: [c] })
   const pcCh = chAgg('Provider Center')
   const isvCh = chAgg('ISV')
   const qrCh = chAgg('QR Code')

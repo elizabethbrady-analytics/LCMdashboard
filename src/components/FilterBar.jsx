@@ -72,6 +72,19 @@ export default function FilterBar() {
           ))}
         </select>
       </div>
+      <div className="filter-group">
+        <span className="filter-label">Provider Type</span>
+        <select
+          className="filter-select"
+          value={f.providerType}
+          onChange={(e) => f.setProviderType(e.target.value)}
+        >
+          <option value="All">All provider types</option>
+          {f.PROVIDER_TYPES.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
       <span className="filter-note">
         Comparison: previous period of equal length · synthetic data
       </span>

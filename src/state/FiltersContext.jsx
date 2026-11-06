@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { MONTHS, INDUSTRIES, PRODUCTS, CHANNELS } from '../data/synthetic.js'
+import { MONTHS, INDUSTRIES, PRODUCTS, CHANNELS, PROVIDER_TYPES } from '../data/synthetic.js'
 
 const FiltersContext = createContext(null)
 
@@ -17,6 +17,7 @@ export function FiltersProvider({ children }) {
   const [industry, setIndustry] = useState('All')
   const [product, setProduct] = useState('All')
   const [channel, setChannel] = useState('All')
+  const [providerType, setProviderType] = useState('All')
   // Custom from/to month range (client feedback 8/5: custom date range)
   const [customFrom, setCustomFrom] = useState(MONTHS[0])
   const [customTo, setCustomTo] = useState(MONTHS[MONTHS.length - 1])
@@ -35,15 +36,16 @@ export function FiltersProvider({ children }) {
       rangeLabel = preset.label
     }
     return {
-      rangeKey, setRangeKey, industry, setIndustry, product, setProduct, channel, setChannel,
+      rangeKey, setRangeKey, industry, setIndustry, product, setProduct, channel, setChannel, providerType, setProviderType,
       customFrom, setCustomFrom, customTo, setCustomTo,
       rangeLabel, months,
       industries: industry === 'All' ? undefined : [industry],
       products: product === 'All' ? undefined : [product],
       channels: channel === 'All' ? undefined : [channel],
-      INDUSTRIES, PRODUCTS, CHANNELS, MONTHS,
+      providerTypes: providerType === 'All' ? undefined : [providerType],
+      INDUSTRIES, PRODUCTS, CHANNELS, PROVIDER_TYPES, MONTHS,
     }
-  }, [rangeKey, industry, product, channel, customFrom, customTo])
+  }, [rangeKey, industry, product, channel, providerType, customFrom, customTo])
 
   return <FiltersContext.Provider value={value}>{children}</FiltersContext.Provider>
 }

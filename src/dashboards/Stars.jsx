@@ -21,7 +21,7 @@ export default function Stars({ scope, priorScope, filter }) {
   const ncsSeries = useMemo(() => series('ncs', segFilter), [segFilter])
   const flows = useMemo(
     () =>
-      migrationMatrix({ industries: filter.industries, products: filter.products, channels: filter.channels, months: filter.months })
+      migrationMatrix({ industries: filter.industries, products: filter.products, channels: filter.channels, providerTypes: filter.providerTypes, months: filter.months })
         .filter((f) => f.from === 'Stars'),
     [filter],
   )

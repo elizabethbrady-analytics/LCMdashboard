@@ -33,6 +33,7 @@ export const SEGMENT_COLORS = {
 export const INDUSTRIES = ['Dental', 'Vision', 'Veterinary', 'Cosmetic', 'Audiology', 'Wellness']
 export const PRODUCTS = ['PLCC', 'PL']
 export const CHANNELS = ['Provider Center', 'ISV', 'QR Code']
+export const PROVIDER_TYPES = ['Multi-location', 'Independent', 'Mid-market', 'Large client']
 
 // Months Jan 2025 → Jul 2026 inclusive
 export const MONTHS = (() => {
@@ -77,6 +78,18 @@ const CHANNEL_SHARE = {
   'Needs Attention': { 'Provider Center': 0.5, ISV: 0.27, 'QR Code': 0.23 },
   Dormant: { 'Provider Center': 0.5, ISV: 0.25, 'QR Code': 0.25 },
 }
+// Provider type mix per segment (synthetic). Shares sum to 1 per segment, so with
+// the Provider Type filter on "All provider types" totals are unchanged.
+const TYPE_SHARE = {
+  'Newly Enrolled': { 'Multi-location': 0.16, Independent: 0.6, 'Mid-market': 0.17, 'Large client': 0.07 },
+  Stars: { 'Multi-location': 0.26, Independent: 0.4, 'Mid-market': 0.19, 'Large client': 0.15 },
+  Consistent: { 'Multi-location': 0.21, Independent: 0.5, 'Mid-market': 0.19, 'Large client': 0.1 },
+  'Engagement Exposures': { 'Multi-location': 0.18, Independent: 0.55, 'Mid-market': 0.18, 'Large client': 0.09 },
+  'Needs Attention': { 'Multi-location': 0.15, Independent: 0.62, 'Mid-market': 0.15, 'Large client': 0.08 },
+  Dormant: { 'Multi-location': 0.12, Independent: 0.7, 'Mid-market': 0.12, 'Large client': 0.06 },
+}
+// Activity over/under-index by provider type (larger practices transact more).
+const TYPE_TILT = { 'Multi-location': 1.08, Independent: 0.9, 'Mid-market': 1.04, 'Large client': 1.18 }
 // Activity over/under-index by channel, so rates (not just volumes) differ.
 const CHANNEL_TILT = { 'Provider Center': 1.0, ISV: 1.12, 'QR Code': 0.82 }
 const ACTIVITY_FIELDS = new Set([
@@ -92,6 +105,27 @@ const SPLIT_FIELDS = [
   'opens', 'clicks', 'unsubs', 'conversions', 'mqls', 'handRaisers', 'repeatApps',
   'repeatTrans', 'inactive', 'reactivated',
 ]
+
+// [subset, superset] pairs that must hold inside every cell.
+const SUBSET_PAIRS = [['active', 'providers'], ['appActive', 'active'], ['salesActive', 'active'], ['fullyActive', 'appActive'], ['approvals', 'apps']]
+
+/** Keep parts[small][i] <= parts[big][i] by moving any excess to parts with room. */
+function capSubset(parts, small, big) {
+  const n = parts[small].length
+  for (let i = 0; i < n; i++) {
+    let excess = parts[small][i] - parts[big][i]
+    while (excess > 0) {
+      let j = -1, best = 0
+      for (let k = 0; k < n; k++) {
+        const room = parts[big][k] - parts[small][k]
+        if (k !== i && room > best) { best = room; j = k }
+      }
+      if (j < 0) break
+      const mv = Math.min(excess, best)
+      parts[small][i] -= mv; parts[small][j] += mv; excess -= mv
+    }
+  }
+}
 
 /** Split an integer across weights so the parts always sum to the total. */
 function splitInt(total, weights) {
@@ -191,9 +225,24 @@ function buildCube() {
             }
           }
           CHANNELS.forEach((channel, ci) => {
-            const row = { segment: seg, industry: ind, product: prod, channel, month }
-            for (const f of SPLIT_FIELDS) row[f] = parts[f][ci]
-            rows.push(row)
+            // Split each channel's values across provider types the same way
+            // (own rng, so the channel-level figures above are untouched).
+            const tRng = mulberry32(hashString(`lcm-pt|${seg}|${ind}|${prod}|${month}|${channel}`))
+            const wT = PROVIDER_TYPES.map((t) => TYPE_SHARE[seg][t] * range(tRng, 0.94, 1.06))
+            const tHead = 1 - Math.min(1, parts.active[ci] / Math.max(1, parts.providers[ci]))
+            const wTAct = PROVIDER_TYPES.map((t, i) => wT[i] * (1 + (TYPE_TILT[t] - 1) * tHead))
+            const tParts = {}
+            for (const f of SPLIT_FIELDS) {
+              tParts[f] = splitInt(parts[f][ci], ACTIVITY_FIELDS.has(f) ? wTAct : wT)
+            }
+            // Safety net: in every provider type a count can never exceed the
+            // count it is a subset of (moves the excess to a type with room).
+            for (const [small, big] of SUBSET_PAIRS) capSubset(tParts, small, big)
+            PROVIDER_TYPES.forEach((providerType, ti) => {
+              const row = { segment: seg, industry: ind, product: prod, channel, providerType, month }
+              for (const f of SPLIT_FIELDS) row[f] = tParts[f][ti]
+              rows.push(row)
+            })
           })
         })
       }
@@ -217,16 +266,17 @@ const SUM_FIELDS = [
 
 /**
  * Aggregate the cube under a filter.
- * filter: { segments?, industries?, products?, channels?, months? } — arrays or undefined (= all)
+ * filter: { segments?, industries?, products?, channels?, providerTypes?, months? } — arrays or undefined (= all)
  */
 export function agg(filter = {}) {
-  const segs = filter.segments, inds = filter.industries, prods = filter.products, chans = filter.channels, months = filter.months
+  const segs = filter.segments, inds = filter.industries, prods = filter.products, chans = filter.channels, ptypes = filter.providerTypes, months = filter.months
   const out = Object.fromEntries(SUM_FIELDS.map((f) => [f, 0]))
   for (const r of CUBE) {
     if (segs && !segs.includes(r.segment)) continue
     if (inds && !inds.includes(r.industry)) continue
     if (prods && !prods.includes(r.product)) continue
     if (chans && !chans.includes(r.channel)) continue
+    if (ptypes && !ptypes.includes(r.providerType)) continue
     if (months && !months.includes(r.month)) continue
     for (const f of SUM_FIELDS) out[f] += r[f]
   }
@@ -273,7 +323,7 @@ export function activationBuckets(filter = {}, scopeKey = 'act') {
 
 /** Segment migration matrix (prior period → current period) for sankey/tables. */
 export function migrationMatrix(filter = {}) {
-  const rng = scopeRng('mig' + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : []), (filter.months ?? []).join(',')]))
+  const rng = scopeRng('mig' + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : []), ...(filter.providerTypes ? [filter.providerTypes] : []), (filter.months ?? []).join(',')]))
   // Stay-rates on the diagonal; movement mass distributed to neighbors.
   const stay = { 'Newly Enrolled': 0.0, Stars: 0.84, Consistent: 0.78, 'Engagement Exposures': 0.72, 'Needs Attention': 0.74, Dormant: 0.88 }
   const flows = []
@@ -441,7 +491,7 @@ const OTHER_STATES = [
 ]
 
 export function stateBreakdown(filter = {}, scopeKey = 'geo') {
-  const rng = scopeRng(scopeKey + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : [])]))
+  const rng = scopeRng(scopeKey + JSON.stringify([filter.industries, filter.products, ...(filter.channels ? [filter.channels] : []), ...(filter.providerTypes ? [filter.providerTypes] : [])]))
   const a = agg(filter)
   const entries = [
     ...Object.entries(STATE_WEIGHTS),
