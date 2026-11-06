@@ -254,14 +254,14 @@ function scopeRng(scopeKey) {
 }
 
 /** Activation-window distribution over the standard time buckets. */
-// Finer increments requested after round 2: weekly early buckets, 15/30-day
-// mid-range, long tail kept.
-export const TIME_BUCKETS = ['0–7', '8–15', '16–30', '31–45', '46–60', '61–90', '91–120', '121–150', '151–180', '181+']
+// Early buckets set to 0–15 / 16–30 / 31–60 (client request); 30-day steps and
+// the long tail kept after that.
+export const TIME_BUCKETS = ['0–15', '16–30', '31–60', '61–90', '91–120', '121–150', '151–180', '181+']
 
 export function activationBuckets(filter = {}, scopeKey = 'act') {
   const rng = scopeRng(scopeKey + JSON.stringify(filter.industries ?? []))
   const a = agg(filter)
-  const weights = [0.11, 0.09, 0.14, 0.11, 0.1, 0.13, 0.09, 0.07, 0.06, 0.1].map((w) => w * range(rng, 0.92, 1.08))
+  const weights = [0.2, 0.14, 0.21, 0.13, 0.09, 0.07, 0.06, 0.1].map((w) => w * range(rng, 0.92, 1.08))
   const total = weights.reduce((s, w) => s + w, 0)
   const activated = Math.round(a.active * 1.0)
   return TIME_BUCKETS.map((bucket, i) => ({
