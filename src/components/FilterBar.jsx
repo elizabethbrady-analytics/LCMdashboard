@@ -86,7 +86,7 @@ export default function FilterBar() {
         </select>
       </div>
       <span className="filter-note">
-        Comparison: previous period of equal length · synthetic data
+        Comparison: previous period of equal length · synthetic data through July 2026
       </span>
     </div>
   )
