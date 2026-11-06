@@ -347,17 +347,39 @@ export function topUrls(filter = {}, scopeKey = 'urls') {
 const ENROLL_SOURCES = [
   ['Sales-led', 0.38], ['Self-serve', 0.27], ['Marketing campaign', 0.23], ['Referral', 0.12],
 ]
+// How each source over/under-indexes on sales activity and on ticket size.
+const SOURCE_TILT = {
+  'Sales-led': { sales: 1.18, ticket: 1.1 },
+  'Self-serve': { sales: 0.82, ticket: 0.92 },
+  'Marketing campaign': { sales: 0.95, ticket: 0.96 },
+  Referral: { sales: 1.12, ticket: 1.05 },
+}
 
 export function sourceBreakdown(filter = {}, scopeKey = 'enroll-src') {
   const rng = scopeRng(scopeKey + JSON.stringify(filter.industries ?? []))
   const a = agg(filter)
   const entries = ENROLL_SOURCES.map(([name, w]) => [name, w * range(rng, 0.88, 1.12)])
   const total = entries.reduce((s, [, w]) => s + w, 0)
-  return entries.map(([name, w]) => ({
-    name,
-    providers: Math.round((a.providers * w) / total),
-    share: w / total,
+  // Sales-active providers and NCS are split across sources with the tilts above,
+  // so each total reconciles to the dashboard-level figure.
+  const tiltRng = scopeRng(scopeKey + 'tilt' + JSON.stringify(filter.industries ?? []))
+  const tilts = entries.map(([name]) => ({
+    sales: SOURCE_TILT[name].sales * range(tiltRng, 0.97, 1.03),
+    ticket: SOURCE_TILT[name].ticket * range(tiltRng, 0.97, 1.03),
   }))
+  const salesActive = splitInt(a.salesActive, entries.map(([, w], i) => w * tilts[i].sales))
+  const ncs = splitInt(a.ncs, entries.map(([, w], i) => w * tilts[i].sales * tilts[i].ticket))
+  const inJourney = splitInt(a.inJourney, entries.map(([, w]) => w))
+  return entries.map(([name, w], i) => {
+    const providers = Math.round((a.providers * w) / total)
+    return {
+      name,
+      providers,
+      share: w / total,
+      salesActiveRate: providers ? Math.min(1, salesActive[i] / providers) : 0,
+      avgTransPerProvider: inJourney[i] ? ncs[i] / inJourney[i] : 0,
+    }
+  })
 }
 
 /** Time-to-value (days) — enrollment → first app / first transaction. */

@@ -143,6 +143,8 @@ export default function NewlyEnrolled({ scope, priorScope, filter }) {
                 <th>Source</th>
                 <th className="num">Enrolled</th>
                 <th className="num">Share</th>
+                <th className="num">Sales Active Rate</th>
+                <th className="num">Avg Transaction $ / provider</th>
               </tr>
             </thead>
             <tbody>
@@ -151,6 +153,8 @@ export default function NewlyEnrolled({ scope, priorScope, filter }) {
                   <td>{s.name}</td>
                   <td className="num">{applyFmt('num', s.providers)}</td>
                   <td className="num">{applyFmt('pct', s.share)}</td>
+                  <td className="num">{applyFmt('pct', s.salesActiveRate)}</td>
+                  <td className="num">{applyFmt('usd', s.avgTransPerProvider)}</td>
                 </tr>
               ))}
             </tbody>
