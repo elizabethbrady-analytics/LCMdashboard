@@ -1,7 +1,8 @@
 // Needs Attention and Dormant — split into two dashboards per client
 // feedback 8/5–8/6. Shared reactivation layout; each segment adds its own
-// KPIs (NA: retention / churn / migration-up; Dormant: reactivation trend
-// vs prior year, emails-to-reactivate, sunsetted contacts).
+// KPIs (NA: migration-up, emails-to-reactivate; Dormant: migration-up,
+// emails-to-reactivate, sunsetted contacts; Dormant also shows the reactivation
+// trend vs prior year).
 
 import { useMemo } from 'react'
 import { byId } from '../data/registry'
@@ -183,7 +184,7 @@ export function NeedsAttention(props) {
       {...props}
       dashId="needs-attention"
       segment="Needs Attention"
-      segKpiKeys={['retention', 'churn', 'migup']}
+      segKpiKeys={['migup', 'emailstoreact']}
       heroTrend={false}
     />
   )

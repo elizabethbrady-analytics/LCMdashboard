@@ -800,28 +800,20 @@ const NA = 'needs-attention'
 const naRows = [
   ...reactivationRows(NA, 'Needs Attention'),
   {
-    id: `${NA}.retention`, dashboard: NA, module: 'Segment KPIs', name: 'Retention rate %', viz: 'scorecard', origin: FB_R86, concept: 'retention-rate',
-    plain: 'The share of Needs Attention providers that stayed in the segment this period.',
-    definition: '% of the segment population that stayed in Needs Attention.',
-    measure: '% overall',
-    source: SRC.seg,
-    eq: { text: 'providers that stayed ÷ segment providers', parts: [['Stayed', 'retained', 'num'], ['Segment providers', 'providers', 'num']], calc: (s) => s.retained / s.providers, fmtKind: 'pct' },
-  },
-  {
-    id: `${NA}.churn`, dashboard: NA, module: 'Segment KPIs', name: 'Churn rate %', viz: 'scorecard', origin: FB_R86, concept: 'churn-rate',
-    plain: 'The share of Needs Attention providers that dropped to Dormant.',
-    definition: '% of the segment population that dropped to the Dormant segment.',
-    measure: '% overall',
-    source: SRC.seg,
-    eq: { text: 'providers that dropped to Dormant ÷ segment providers', parts: [['Dropped to Dormant', 'movedDown', 'num'], ['Segment providers', 'providers', 'num']], calc: (s) => s.movedDown / s.providers, fmtKind: 'pct' },
-  },
-  {
-    id: `${NA}.migup`, dashboard: NA, module: 'Segment KPIs', name: 'Migration rate %', viz: 'scorecard', origin: FB_R86, concept: 'upward-migration',
-    plain: 'The share of Needs Attention providers that moved up to Engagement Exposures, Consistent, or Stars.',
-    definition: '% of the segment population that moved up to Engagement Exposures, Consistent, or Stars.',
+    id: `${NA}.migup`, dashboard: NA, module: 'Segment KPIs', name: 'Migration up rate %', viz: 'scorecard', origin: FB_R86, concept: 'upward-migration',
+    plain: 'The share of Needs Attention providers that moved up to any higher segment.',
+    definition: '% of the Needs Attention population that moved up to any segment.',
     measure: '% overall',
     source: SRC.seg,
     eq: { text: 'providers that moved up ÷ segment providers', parts: [['Moved up', 'movedUp', 'num'], ['Segment providers', 'providers', 'num']], calc: (s) => s.movedUp / s.providers, fmtKind: 'pct' },
+  },
+  {
+    id: `${NA}.emailstoreact`, dashboard: NA, module: 'Segment KPIs', name: 'Avg # emails to reactivate', viz: 'scorecard', origin: FB_R86, modeled: true,
+    plain: 'For providers that reactivated, how many journey emails it took on average.',
+    definition: 'Average journey emails received before reactivation, among reactivated providers. Shown here with an illustrative model — real value needs the send-log join.',
+    measure: 'Avg count',
+    source: SRC.mktc,
+    eq: { text: 'journey emails received before reactivation ÷ reactivated providers', parts: [['Avg emails to reactivate', 'avgEmailsToReactivate', 'num1']], calc: (s) => s.avgEmailsToReactivate, fmtKind: 'num1' },
   },
 ]
 
