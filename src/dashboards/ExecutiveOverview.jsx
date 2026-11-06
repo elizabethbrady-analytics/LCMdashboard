@@ -121,7 +121,7 @@ export default function ExecutiveOverview({ scope, priorScope, filter }) {
       <section className="card">
         <div className="module-title">Journey health</div>
         <div className="metric-grid">
-          {['activated', 'actrate', 'fullyact', 'retention', 'reactivation', 'activepct', 'appactivepct', 'appsper', 'transper', 'repeat', 'ltv', 'firstpurchase'].map((k) => (
+          {['activated', 'actrate', 'fullyact', 'retention', 'reactivation', 'activepct', 'appactivepct', 'appsper', 'transper', 'repeat', 'ltv', 'firstpurchase', 'repeatch'].map((k) => (
             <Scorecard key={k} metric={m(k)} scope={scope} priorScope={priorScope} />
           ))}
         </div>

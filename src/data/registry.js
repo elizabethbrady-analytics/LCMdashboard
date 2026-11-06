@@ -184,6 +184,24 @@ function commonExecRows(dash, opts = {}) {
       source: SRC.trx,
       eq: { text: 'transactions ÷ active providers', parts: [['Transactions', 'transactions', 'num'], ['Active providers', 'active', 'num']], calc: (s) => s.transactions / s.active, fmtKind: 'num1' },
     }]),
+    ...(opts.noCHTrans ? [] : [
+      {
+        id: `${dash}.firstch`, dashboard: dash, module: m, name: 'First CH transactions', viz: 'scorecard',
+        plain: 'Cardholders who made their first transaction this period.',
+        definition: 'Cardholder first transactions in the period.',
+        measure: 'Total',
+        source: src('First transaction records for cardholder accounts', 'DWH (application + transaction join)'),
+        eq: { text: 'count of cardholder first transactions', parts: [['First transactions', 'firstPurchases', 'num']], calc: (s) => s.firstPurchases, fmtKind: 'num' },
+      },
+      {
+        id: `${dash}.repeatch`, dashboard: dash, module: m, name: 'Repeat CH transactions', viz: 'scorecard',
+        plain: 'Repeat purchases by cardholders, after their first transaction, this period.',
+        definition: 'Cardholder repeat transactions in the period (second and later transactions on a cardholder account).',
+        measure: 'Total',
+        source: src('Repeat transaction records for cardholder accounts', 'DWH (application + transaction join)'),
+        eq: { text: 'count of cardholder repeat transactions', parts: [['Repeat transactions', 'repeatTrans', 'num']], calc: (s) => s.repeatTrans, fmtKind: 'num' },
+      },
+    ]),
     {
       id: `${dash}.repeat`, dashboard: dash, module: m, name: 'Repeat app %', viz: 'scorecard',
       plain: 'Of all applications, the share that came from providers applying more than once.',
@@ -349,12 +367,20 @@ const execView = [
     eq: { text: '(activated + reactivated) × average provider LTV', parts: [['Activated providers', 'active', 'num'], ['Reactivated providers', 'reactivated', 'num'], ['Avg provider LTV', 'avgLtv', 'usd']], calc: (s) => (s.active + s.reactivated) * s.avgLtv, fmtKind: 'usd' },
   },
   {
-    id: `${EXEC}.firstpurchase`, dashboard: EXEC, module: 'Executive View', name: 'First Purchase (cardholder first transaction)', viz: 'scorecard+trend', origin: FB_KA,
+    id: `${EXEC}.firstpurchase`, dashboard: EXEC, module: 'Executive View', name: 'First CH transactions', viz: 'scorecard+trend', origin: FB_KA,
     plain: 'How many new cardholders made their first purchase — counted per month.',
     definition: 'Cardholder first transactions (activated cardholders), # per month.',
     measure: 'Total per month',
     source: src('First transaction records for new cardholder accounts', 'DWH (application + transaction join)'),
     eq: { text: 'count of cardholder first transactions in the period', parts: [['First purchases', 'firstPurchases', 'num']], calc: (s) => s.firstPurchases, fmtKind: 'num' },
+  },
+  {
+    id: `${EXEC}.repeatch`, dashboard: EXEC, module: 'Executive View', name: 'Repeat CH transactions', viz: 'scorecard',
+    plain: 'Repeat purchases by cardholders across all accounts, after their first transaction, this period.',
+    definition: 'Cardholder repeat transactions across all accounts in the period (second and later transactions on a cardholder account).',
+    measure: 'Total',
+    source: src('Repeat transaction records for cardholder accounts', 'DWH (application + transaction join)'),
+    eq: { text: 'count of cardholder repeat transactions', parts: [['Repeat transactions', 'repeatTrans', 'num']], calc: (s) => s.repeatTrans, fmtKind: 'num' },
   },
   {
     id: `${EXEC}.unsub`, dashboard: EXEC, module: 'Executive View', name: 'Unsubscribe rate', viz: 'scorecard', origin: FB_K85,
@@ -467,7 +493,7 @@ const execView = [
 // ---------------------------------------------------------------------------
 const NE = 'newly-enrolled'
 const neExec = [
-  ...commonExecRows(NE, { migrationDef: 'Once done with the journey, where providers fall in segmentation, and when.' }),
+  ...commonExecRows(NE, { noCHTrans: true, migrationDef: 'Once done with the journey, where providers fall in segmentation, and when.' }),
   {
     id: `${NE}.actrate`, dashboard: NE, module: 'Executive / Funnel', name: 'Activation rate', viz: 'scorecard',
     plain: 'Of every 100 newly enrolled providers, how many activated (first application and/or first transaction).',
@@ -501,7 +527,7 @@ const neExec = [
     eq: { text: 'Net Credit Sales ÷ activated providers', parts: [['Net Credit Sales', 'ncs', 'usd'], ['Activated providers', 'active', 'num']], calc: (s) => s.ncs / s.active, fmtKind: 'usd' },
   },
   {
-    id: `${NE}.firstch`, dashboard: NE, module: 'Executive / Funnel', name: 'First transaction CH', viz: 'scorecard', origin: FB_K85,
+    id: `${NE}.firstch`, dashboard: NE, module: 'Executive / Funnel', name: 'First CH transactions', viz: 'scorecard', origin: FB_K85,
     plain: 'New cardholders who made their first purchase this period.',
     definition: 'Cardholder first transactions in the period.',
     measure: 'Total',
@@ -509,7 +535,7 @@ const neExec = [
     eq: { text: 'count of cardholder first transactions', parts: [['First purchases', 'firstPurchases', 'num']], calc: (s) => s.firstPurchases, fmtKind: 'num' },
   },
   {
-    id: `${NE}.repeatch`, dashboard: NE, module: 'Executive / Funnel', name: 'Repeat Transactions per CH', viz: 'scorecard',
+    id: `${NE}.repeatch`, dashboard: NE, module: 'Executive / Funnel', name: 'Repeat CH transactions', viz: 'scorecard',
     plain: 'Repeat purchases by new cardholders, after their first transaction, this period.',
     definition: 'Cardholder repeat transactions in the period (second and later transactions on a cardholder account).',
     measure: 'Total',

@@ -54,7 +54,7 @@ export default function Stars({ scope, priorScope, filter }) {
       <section className="card">
         <div className="module-title">Executive / Funnel view</div>
         <div className="metric-grid">
-          {['subs', 'ncslift', 'appsper', 'transper', 'repeat', 'mql', 'hand', 'handopen', 'product'].map((k) => (
+          {['subs', 'ncslift', 'appsper', 'transper', 'firstch', 'repeatch', 'repeat', 'mql', 'hand', 'handopen', 'product'].map((k) => (
             <Scorecard key={k} metric={m(k)} scope={scope} priorScope={priorScope} />
           ))}
         </div>
